@@ -1,0 +1,351 @@
+<Window x:Class="AmpCast.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:AmpCast.Controls"
+        Title="AmpCast" Width="1080" Height="728"
+        ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen"
+        Icon="Assets/AmpCast.ico"
+        Background="{StaticResource BaseBrush}"
+        Foreground="{StaticResource TextBrush}"
+        FontFamily="{StaticResource UiFont}"
+        UseLayoutRounding="True"
+        TextOptions.TextRenderingMode="ClearType">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="64" ResizeBorderThickness="0" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False" />
+    </WindowChrome.WindowChrome>
+
+    <Grid x:Name="Root" Background="{StaticResource BaseBrush}" ClipToBounds="True">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="256" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- ambient neon -->
+        <Ellipse Grid.ColumnSpan="2" Width="700" Height="460" HorizontalAlignment="Right" VerticalAlignment="Top"
+                 Margin="0,-260,-200,0" IsHitTestVisible="False" Opacity="0.30">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="#AF47FF" Offset="0" />
+                    <GradientStop Color="#00AF47FF" Offset="1" />
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
+        <Ellipse Grid.ColumnSpan="2" Width="620" Height="420" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                 Margin="120,0,0,-300" IsHitTestVisible="False" Opacity="0.22">
+            <Ellipse.Fill>
+                <RadialGradientBrush>
+                    <GradientStop Color="#5865F2" Offset="0" />
+                    <GradientStop Color="#005865F2" Offset="1" />
+                </RadialGradientBrush>
+            </Ellipse.Fill>
+        </Ellipse>
+
+        <!-- ============ SIDEBAR ============ -->
+        <Border Grid.Column="0" Margin="12" CornerRadius="20" Background="{StaticResource CardBrush}" Padding="18,20">
+            <DockPanel LastChildFill="False">
+                <!-- brand -->
+                <StackPanel DockPanel.Dock="Top" Orientation="Horizontal">
+                    <Image Source="{StaticResource LogoIconImage}" Width="46" Height="46" />
+                    <StackPanel Margin="12,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="AmpCast" FontSize="21" FontWeight="Bold" />
+                        <TextBlock Text="by desNotto" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- status -->
+                <TextBlock DockPanel.Dock="Top" Text="СТАТУС" Style="{StaticResource Caption}" Margin="4,28,0,8" />
+                <StackPanel DockPanel.Dock="Top">
+                    <Grid Margin="4,6">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="18" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Ellipse x:Name="DawDot" Style="{StaticResource StatusDot}" Margin="0,6,0,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="DAW" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock x:Name="DawStatusText" Text="ожидание…" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="4,6">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="18" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Ellipse x:Name="MicDot" Style="{StaticResource StatusDot}" Margin="0,6,0,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Микрофон" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock x:Name="MicStatusText" Text="—" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="4,6">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="18" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Ellipse x:Name="CableDot" Style="{StaticResource StatusDot}" Margin="0,6,0,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Discord-кабель" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock x:Name="CableStatusText" Text="—" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Grid>
+                    <Grid Margin="4,6">
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="18" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
+                        <Ellipse x:Name="RateDot" Style="{StaticResource StatusDot}" Margin="0,6,0,0" VerticalAlignment="Top" />
+                        <StackPanel Grid.Column="1">
+                            <TextBlock Text="Частота" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock x:Name="RateStatusText" Text="—" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+
+                <!-- routing -->
+                <TextBlock DockPanel.Dock="Top" Text="МАРШРУТ" Style="{StaticResource Caption}" Margin="4,22,0,10" />
+                <StackPanel DockPanel.Dock="Top" Margin="4,0,0,0">
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,9">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xEC4F;" Foreground="{StaticResource PurpleBrush}" Width="22" />
+                        <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="Гитара → интерфейс → DAW" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,9">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE7F6;" Foreground="{StaticResource PurpleBrush}" Width="22" />
+                        <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="DAW → наушники напрямую" />
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE720;" Foreground="{StaticResource BlurpleBrush}" Width="22" />
+                        <TextBlock FontSize="12" Foreground="{StaticResource TextSecondaryBrush}" Text="DAW + микрофон → Discord" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- footer -->
+                <TextBlock DockPanel.Dock="Bottom" Margin="4,12,0,0" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
+                           Text="v1.0 · бесплатно · © desNotto" />
+
+                <!-- quick setup -->
+                <Border DockPanel.Dock="Bottom" CornerRadius="14" Background="{StaticResource BaseBrush}" Padding="14,12">
+                    <StackPanel>
+                        <TextBlock Text="Как подключить" FontSize="12.5" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11.5" Margin="0,0,0,6">
+                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="1 " />В DAW выберите драйвер «AmpCast ASIO», 48 кГц, буфер 64–128.
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11.5" Margin="0,0,0,6">
+                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="2 " />Discord → Голос и видео → Устройство ввода: виртуальный кабель.
+                        </TextBlock>
+                        <TextBlock Style="{StaticResource Muted}" FontSize="11.5">
+                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="3 " />Отключите в Discord шумоподавление и эхоподавление.
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+            </DockPanel>
+        </Border>
+
+        <!-- ============ MAIN ============ -->
+        <Grid Grid.Column="1" Margin="8,12,20,14">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- header / caption -->
+            <Grid Grid.Row="0" Height="52">
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="Гитара в Discord" Style="{StaticResource H1}" />
+                    <TextBlock Text="Играйте в DAW без задержки — ученики слышат вас и инструмент в стерео"
+                               FontSize="12.5" Foreground="{StaticResource TextMutedBrush}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
+                    <Button x:Name="MinimizeButton" Style="{StaticResource CaptionButton}" Content="&#xE921;" ToolTip="Свернуть в трей"
+                            WindowChrome.IsHitTestVisibleInChrome="True" Click="MinimizeButton_Click" />
+                    <Button x:Name="CloseButton" Style="{StaticResource CaptionCloseButton}" Content="&#xE8BB;" ToolTip="Закрыть (продолжит работать в трее)"
+                            WindowChrome.IsHitTestVisibleInChrome="True" Click="CloseButton_Click" Margin="4,0,0,0" />
+                </StackPanel>
+            </Grid>
+
+            <!-- hero: broadcast -->
+            <Border Grid.Row="1" x:Name="Hero" Height="158" CornerRadius="22" Margin="0,14,0,16" BorderThickness="1" ClipToBounds="False">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource CardBrush}" />
+                        <Setter Property="BorderBrush" Value="{StaticResource HeroBorderGradient}" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=BroadcastToggle}" Value="True">
+                                <Setter Property="Background" Value="{StaticResource HeroGradient}" />
+                                <Setter Property="BorderBrush" Value="#33FFFFFF" />
+                                <Setter Property="Effect" Value="{StaticResource PurpleGlow}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel VerticalAlignment="Center" Margin="30,0,12,0">
+                        <Border HorizontalAlignment="Left" CornerRadius="10" Background="#26FFFFFF" Padding="10,3">
+                            <StackPanel Orientation="Horizontal">
+                                <Ellipse x:Name="HeroBadgeDot" Width="7" Height="7" Fill="#80848E" Margin="0,0,7,0" VerticalAlignment="Center" />
+                                <TextBlock x:Name="HeroBadge" Text="НЕ В ЭФИРЕ" FontSize="11" FontWeight="Bold" Foreground="White" />
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="HeroTitle" Text="Трансляция выключена" FontSize="28" FontWeight="Bold" Margin="0,10,0,4" Foreground="White" />
+                        <TextBlock x:Name="HeroSubtitle" Text="DAW + микрофон → виртуальный кабель · 48 кГц" FontSize="13" Foreground="#D9FFFFFF" TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+                    <!-- live waveform -->
+                    <ItemsControl x:Name="WaveBars" Grid.Column="1" VerticalAlignment="Center" Height="84" Margin="0,0,24,0" IsHitTestVisible="False">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <ToggleButton x:Name="BroadcastToggle" Grid.Column="2" Style="{StaticResource BroadcastToggle}" Margin="0,0,30,0"
+                                  VerticalAlignment="Center" Checked="BroadcastToggle_Changed" Unchecked="BroadcastToggle_Changed" />
+                </Grid>
+            </Border>
+
+            <!-- cards -->
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="1.18*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- devices -->
+                <Border Grid.Column="0" Style="{StaticResource Card}">
+                    <StackPanel>
+                        <Grid Margin="0,0,0,14">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource Icon}" Text="&#xE713;" Margin="0,0,8,0" />
+                                <TextBlock Text="Устройства" Style="{StaticResource CardTitle}" />
+                            </StackPanel>
+                            <Button Style="{StaticResource GhostButton}" HorizontalAlignment="Right" Padding="10,4" Click="SoundSettings_Click"
+                                    ToolTip="Открыть панель «Звук» Windows (частота 48 кГц и т.д.)">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE767;" FontSize="12" Margin="0,0,6,0" Foreground="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}" />
+                                    <TextBlock Text="Звук Windows" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+
+                        <TextBlock Text="Аудиоинтерфейс (ASIO) — гитара и наушники" Style="{StaticResource Label}" />
+                        <ComboBox x:Name="AsioCombo" Style="{StaticResource DarkComboBox}" Tag="ASIO-интерфейс не найден"
+                                  SelectionChanged="AsioCombo_SelectionChanged" />
+
+                        <TextBlock Text="Микрофон (голос)" Style="{StaticResource Label}" Margin="2,14,0,6" />
+                        <ComboBox x:Name="MicCombo" Style="{StaticResource DarkComboBox}" Tag="Без микрофона"
+                                  SelectionChanged="DeviceCombo_SelectionChanged" />
+
+                        <TextBlock Text="Выход в Discord (виртуальный кабель)" Style="{StaticResource Label}" Margin="2,14,0,6" />
+                        <ComboBox x:Name="OutputCombo" Style="{StaticResource DarkComboBox}" Tag="Выберите виртуальный кабель"
+                                  SelectionChanged="DeviceCombo_SelectionChanged" />
+
+                        <CheckBox x:Name="Lock48Check" Style="{StaticResource Switch}" Margin="2,16,0,0"
+                                  Content="Только 48 кГц (защита от хрипа и скрежета)"
+                                  Checked="Lock48Check_Changed" Unchecked="Lock48Check_Changed" />
+
+                        <StackPanel x:Name="WarningsPanel" Margin="0,12,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- mixer -->
+                <Border Grid.Column="2" Style="{StaticResource Card}">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <Grid Margin="0,0,0,14">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <TextBlock Style="{StaticResource Icon}" Text="&#xE9E9;" Margin="0,0,8,0" />
+                                <TextBlock Text="Микс для Discord" Style="{StaticResource CardTitle}" />
+                            </StackPanel>
+                            <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}"
+                                       Text="на наушники не влияет" />
+                        </Grid>
+
+                        <Grid Grid.Row="1">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="12" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- DAW strip -->
+                            <Border Grid.Column="0" Style="{StaticResource Strip}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Style="{StaticResource Icon}" Text="&#xEC4F;" Foreground="{StaticResource PurpleBrush}" Margin="0,0,6,0" />
+                                        <TextBlock Text="DAW" FontSize="13" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="DawDbText" Grid.Row="1" Text="0.0 dB" HorizontalAlignment="Center" FontSize="11.5"
+                                               Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,10" />
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <c:VuMeter x:Name="DawMeterL" Width="9" />
+                                        <c:VuMeter x:Name="DawMeterR" Width="9" Margin="4,0,0,0" />
+                                        <Slider x:Name="DawSlider" Style="{StaticResource Fader}" Margin="10,0,0,0" ValueChanged="Volume_ValueChanged" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Row="3" Text="СТЕРЕО" Style="{StaticResource Caption}" FontSize="10" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                                </Grid>
+                            </Border>
+
+                            <!-- MIC strip -->
+                            <Border Grid.Column="2" Style="{StaticResource Strip}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Style="{StaticResource Icon}" Text="&#xE720;" Foreground="{StaticResource BlurpleBrush}" Margin="0,0,6,0" />
+                                        <TextBlock Text="Микрофон" FontSize="13" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="MicDbText" Grid.Row="1" Text="0.0 dB" HorizontalAlignment="Center" FontSize="11.5"
+                                               Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,10" />
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <c:VuMeter x:Name="MicMeter" Width="12" />
+                                        <Slider x:Name="MicSlider" Style="{StaticResource Fader}" Margin="10,0,0,0" ValueChanged="Volume_ValueChanged" />
+                                    </StackPanel>
+                                    <TextBlock Grid.Row="3" Text="МОНО" Style="{StaticResource Caption}" FontSize="10" HorizontalAlignment="Center" Margin="0,8,0,0" />
+                                </Grid>
+                            </Border>
+
+                            <!-- OUT strip -->
+                            <Border Grid.Column="4" Style="{StaticResource Strip}">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <TextBlock Style="{StaticResource Icon}" Text="&#xE767;" Foreground="{StaticResource TextBrush}" Margin="0,0,6,0" />
+                                        <TextBlock Text="В Discord" FontSize="13" FontWeight="SemiBold" />
+                                    </StackPanel>
+                                    <TextBlock x:Name="ClipText" Grid.Row="1" Text="без перегруза" HorizontalAlignment="Center" FontSize="11.5"
+                                               Foreground="{StaticResource TextMutedBrush}" Margin="0,2,0,10" />
+                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <c:VuMeter x:Name="OutMeterL" Width="12" />
+                                        <c:VuMeter x:Name="OutMeterR" Width="12" Margin="4,0,0,0" />
+                                    </StackPanel>
+                                    <Border x:Name="OutBadge" Grid.Row="3" HorizontalAlignment="Center" CornerRadius="8" Padding="8,2" Margin="0,8,0,0" Background="#383A40">
+                                        <TextBlock x:Name="OutBadgeText" Text="ВЫКЛ" FontSize="10" FontWeight="Bold" Foreground="{StaticResource TextSecondaryBrush}" />
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- footer -->
+            <TextBlock x:Name="FooterText" Grid.Row="3" Margin="4,12,0,0" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}"
+                       TextTrimming="CharacterEllipsis" Text="AmpCast ASIO · ожидание DAW" />
+        </Grid>
+    </Grid>
+</Window>

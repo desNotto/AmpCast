@@ -1,0 +1,50 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <PlatformTarget>x64</PlatformTarget>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>false</SelfContained>
+
+    <AssemblyName>AmpCast</AssemblyName>
+    <RootNamespace>AmpCast</RootNamespace>
+    <ApplicationIcon>Assets\AmpCast.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <Product>AmpCast</Product>
+    <Company>desNotto</Company>
+    <Authors>desNotto</Authors>
+    <Copyright>© desNotto. Free software.</Copyright>
+    <Description>AmpCast — guitar from your DAW to Discord, zero-latency monitoring.</Description>
+    <Version>1.0.0</Version>
+
+    <!-- Audio-friendly runtime settings: workstation + concurrent GC,
+         the audio callbacks themselves are allocation-free. -->
+    <ServerGarbageCollection>false</ServerGarbageCollection>
+    <ConcurrentGarbageCollection>true</ConcurrentGarbageCollection>
+    <TieredPGO>true</TieredPGO>
+    <InvariantGlobalization>false</InvariantGlobalization>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="NAudio.Wasapi" Version="2.2.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\AmpCast.ico" />
+  </ItemGroup>
+
+  <!-- Native ASIO driver DLLs (built from src/AmpCast.Asio) are copied next to the exe when present. -->
+  <ItemGroup>
+    <None Include="..\..\build\asio\x64\AmpCastAsio64.dll" Condition="Exists('..\..\build\asio\x64\AmpCastAsio64.dll')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="AmpCastAsio64.dll" />
+    <None Include="..\..\build\asio\x86\AmpCastAsio32.dll" Condition="Exists('..\..\build\asio\x86\AmpCastAsio32.dll')" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" Link="AmpCastAsio32.dll" />
+  </ItemGroup>
+
+</Project>

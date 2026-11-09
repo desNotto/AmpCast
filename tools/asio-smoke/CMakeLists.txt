@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.20)
+project(asio_smoke LANGUAGES CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+add_executable(asio_smoke main.cpp)
+target_compile_definitions(asio_smoke PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX)
+target_compile_options(asio_smoke PRIVATE /W4 /utf-8)
+target_link_libraries(asio_smoke PRIVATE ole32 uuid)

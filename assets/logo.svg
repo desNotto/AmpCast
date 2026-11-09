@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="512" height="512">
+  <title>AmpCast</title>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2B2D31"/>
+      <stop offset="1" stop-color="#1E1F22"/>
+    </linearGradient>
+    <linearGradient id="stroke" gradientUnits="userSpaceOnUse" x1="0" y1="28" x2="0" y2="232">
+      <stop offset="0" stop-color="#F4F4FF"/>
+      <stop offset="0.5" stop-color="#D3D6FF"/>
+      <stop offset="0.56" stop-color="#AF47FF"/>
+      <stop offset="1" stop-color="#5865F2"/>
+    </linearGradient>
+    <linearGradient id="glow" gradientUnits="userSpaceOnUse" x1="0" y1="28" x2="0" y2="232">
+      <stop offset="0.38" stop-color="#AF47FF" stop-opacity="0"/>
+      <stop offset="0.58" stop-color="#AF47FF"/>
+      <stop offset="1" stop-color="#5865F2"/>
+    </linearGradient>
+    <linearGradient id="bars" gradientUnits="userSpaceOnUse" x1="0" y1="114" x2="0" y2="208">
+      <stop offset="0" stop-color="#D98BFF"/>
+      <stop offset="0.35" stop-color="#AF47FF"/>
+      <stop offset="1" stop-color="#5865F2"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="128" cy="176" r="86" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 176) scale(1 0.814) translate(0 -176)">
+      <stop offset="0" stop-color="#AF47FF" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#AF47FF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="blur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="6"/></filter>
+    <path id="guitar" d="M114,28 L114,100 C114,88 100,74 88,70 C78,67 70,74 72,86 C74,104 84,118 82,134 C80,146 58,158 58,184 C58,212 88,230 128,230 C168,230 198,212 198,184 C198,158 176,146 174,132 C172,116 184,96 182,76 C181,62 172,56 164,62 C154,70 142,84 142,96 L142,28"/>
+    <g id="eq">
+      <rect x="78.5" y="184" width="9" height="24" rx="4.5"/>
+      <rect x="93.5" y="164" width="9" height="44" rx="4.5"/>
+      <rect x="108.5" y="140" width="9" height="68" rx="4.5"/>
+      <rect x="123.5" y="114" width="9" height="94" rx="4.5"/>
+      <rect x="138.5" y="146" width="9" height="62" rx="4.5"/>
+      <rect x="153.5" y="170" width="9" height="38" rx="4.5"/>
+      <rect x="168.5" y="188" width="9" height="20" rx="4.5"/>
+    </g>
+  </defs>
+
+  <!-- squircle -->
+  <path d="M0,128 C0,20 20,0 128,0 C236,0 256,20 256,128 C256,236 236,256 128,256 C20,256 0,236 0,128 Z" fill="url(#bg)"/>
+
+  <!-- mark at 84 % -->
+  <g transform="translate(20.5 22) scale(0.84)">
+    <ellipse cx="128" cy="176" rx="86" ry="70" fill="url(#halo)"/>
+    <use href="#guitar" fill="none" stroke="url(#glow)" stroke-width="16" stroke-linecap="round" stroke-linejoin="round" filter="url(#blur)" opacity="0.8"/>
+    <use href="#guitar" fill="none" stroke="url(#stroke)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+    <use href="#eq" fill="#AF47FF" filter="url(#blur)" opacity="0.6"/>
+    <use href="#eq" fill="url(#bars)"/>
+  </g>
+</svg>
