@@ -2,7 +2,7 @@
 ; Build: run ..\build.ps1, or ISCC.exe AmpCast.iss after "dotnet publish" + the native driver build.
 
 #define AppName      "AmpCast"
-#define AppVersion   "1.0.1"
+#define AppVersion   "1.0.2"
 #define AppPublisher "desNotto"
 #define AppExe       "AmpCast.exe"
 #define PublishDir   "..\build\publish"
@@ -98,6 +98,27 @@ begin
     RebootNeeded := True
   else if Code <> 0 then
     SuppressibleMsgBox(FmtMessage(CustomMessage('StepFailed'), [Title, IntToStr(Code)]), mbError, MB_OK, IDOK);
+end;
+
+{ AmpCast hides to the tray instead of closing, so Restart Manager may not stop it:
+  end it before files are replaced or removed. Settings are saved on every change. }
+procedure StopAmpCast();
+var
+  Code: Integer;
+begin
+  Exec(ExpandConstant('{sys}\taskkill.exe'), '/F /IM {#AppExe}', '', SW_HIDE, ewWaitUntilTerminated, Code);
+end;
+
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+begin
+  StopAmpCast();
+  Result := '';
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  StopAmpCast();
+  Result := True;
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);

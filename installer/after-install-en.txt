@@ -18,4 +18,10 @@
    Turn off noise suppression, echo cancellation and automatic gain control.
    Then press "Broadcast to Discord" in AmpCast.
 
-You can close the AmpCast window; it keeps running in the tray.
+STEREO. Discord voice channels are always mono. For stereo DAW sound:
+   turn on "Stereo via screen share" in AmpCast,
+   set the Discord input device to your microphone (not the cable),
+   Share Screen > Applications > AmpCast, with sound on.
+   Keep the AmpCast window open (minimizing is fine).
+
+In normal mode you can close the AmpCast window; it keeps running in the tray.

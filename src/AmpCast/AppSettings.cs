@@ -12,6 +12,8 @@ public sealed class AppSettings
     public double MicVolume { get; set; } = 70;
     public double DawVolume { get; set; } = 70;
     public bool Broadcast { get; set; }
+    /// <summary>Stereo mode: DAW only, heard by Discord through screen sharing (Go Live) of the AmpCast window.</summary>
+    public bool StereoStream { get; set; }
     public bool TrayHintShown { get; set; }
 
     private static readonly string FilePath =

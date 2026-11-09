@@ -21,8 +21,9 @@ std::vector<ASIOBufferInfo> g_buffers;
 std::vector<ASIOSampleType> g_types;
 long g_bufferSize = 0;
 long g_hwOutputs = 0;
-double g_phase = 0;
+long long g_frame = 0;
 double g_rate = 48000;
+double g_rightHz = 440.0;   // "stereo" argument: 660 Hz on the right channel
 std::atomic<long> g_callbacks{ 0 };
 
 void WriteSample(void* buffer, ASIOSampleType type, long i, double v)
@@ -44,18 +45,18 @@ void WriteSample(void* buffer, ASIOSampleType type, long i, double v)
 
 void __cdecl OnBufferSwitch(long index, ASIOBool)
 {
-    const double step = 2.0 * 3.14159265358979 * 440.0 / g_rate;
+    const double twoPi = 2.0 * 3.14159265358979;
     for (size_t c = 0; c < g_buffers.size(); ++c) {
         const ASIOBufferInfo& b = g_buffers[c];
         if (b.isInput) continue;
         const bool virtualOut = b.channelNum >= g_hwOutputs;
-        double phase = g_phase;
+        const double hz = b.channelNum == g_hwOutputs + 1 ? g_rightHz : 440.0;
         for (long i = 0; i < g_bufferSize; ++i) {
-            WriteSample(b.buffers[index], g_types[c], i, virtualOut ? 0.1 * std::sin(phase) : 0.0);
-            phase += step;
+            const double cycles = std::fmod(hz * static_cast<double>(g_frame + i) / g_rate, 1.0);
+            WriteSample(b.buffers[index], g_types[c], i, virtualOut ? 0.1 * std::sin(twoPi * cycles) : 0.0);
         }
     }
-    g_phase = std::fmod(g_phase + step * g_bufferSize, 2.0 * 3.14159265358979);
+    g_frame += g_bufferSize;
     ++g_callbacks;
 }
 
@@ -94,7 +95,9 @@ int Fail(const char* what)
 
 int wmain(int argc, wchar_t** argv)
 {
-    if (argc < 2) { std::printf("usage: asio_smoke <AmpCastAsio64.dll>\n"); return 2; }
+    if (argc < 2) { std::printf("usage: asio_smoke <AmpCastAsio64.dll> [seconds] [stereo]\n"); return 2; }
+    const int seconds = argc > 2 ? _wtoi(argv[2]) : 3;
+    if (argc > 3 && wcscmp(argv[3], L"stereo") == 0) g_rightHz = 660.0;
     CoInitialize(nullptr);
 
     HMODULE dll = LoadLibraryW(argv[1]);
@@ -149,11 +152,11 @@ int wmain(int argc, wchar_t** argv)
     const LONG64 startPos = hdr ? hdr->writePos : 0;
 
     if (g_asio->start() != ASE_OK) return Fail("start:");
-    Sleep(3000);
+    Sleep(static_cast<DWORD>(seconds) * 1000);
     g_asio->stop();
 
     int result = 0;
-    std::printf("callbacks in 3 s: %ld (expect ~%.0f)\n", g_callbacks.load(), 3.0 * g_rate / pref);
+    std::printf("callbacks in %d s: %ld (expect ~%.0f)\n", seconds, g_callbacks.load(), seconds * g_rate / pref);
     if (g_callbacks.load() < 10) result = Fail("hardware is not calling back");
 
     if (!hdr) {

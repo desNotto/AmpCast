@@ -54,6 +54,7 @@ public sealed class AudioEngine : IDisposable
     private volatile float _micGainTarget = 1f;
     private volatile float _dawGainTarget = 1f;
     private volatile bool _broadcast;
+    private volatile bool _stereoStream;
 
     // Render-thread state.
     private float _micGain, _dawGain, _castGain;
@@ -75,6 +76,14 @@ public sealed class AudioEngine : IDisposable
     public float MicGain { get => _micGainTarget; set => _micGainTarget = Math.Max(0f, value); }
     public float DawGain { get => _dawGainTarget; set => _dawGainTarget = Math.Max(0f, value); }
     public bool Broadcast { get => _broadcast; set => _broadcast = value; }
+
+    /// <summary>
+    /// Stereo mode for Discord screen sharing: Discord's voice channel downmixes any
+    /// microphone to mono, but a shared application's audio stays stereo. In this mode
+    /// the output carries the DAW only; the voice goes to Discord directly from the
+    /// real microphone, so it is not heard twice.
+    /// </summary>
+    public bool StereoStream { get => _stereoStream; set => _stereoStream = value; }
 
     public bool DawConnected => _bus.IsAlive;
     public string DawHostName => _bus.HostName;
@@ -290,7 +299,7 @@ public sealed class AudioEngine : IDisposable
         else Array.Clear(_micBlock, 0, frames);
 
         float k = _smoothing;
-        float micTarget = _micGainTarget, dawTarget = _dawGainTarget, castTarget = _broadcast ? 1f : 0f;
+        float micTarget = _stereoStream ? 0f : _micGainTarget, dawTarget = _dawGainTarget, castTarget = _broadcast ? 1f : 0f;
         float micGain = _micGain, dawGain = _dawGain, castGain = _castGain;
         float peakDawL = 0, peakDawR = 0, peakMic = 0, peakOutL = 0, peakOutR = 0;
         bool clipped = false;

@@ -63,11 +63,14 @@ public partial class MainWindow : Window
         InitializeComponent();
         BuildWaveBars();
 
-        _settings = demo ? new AppSettings { Broadcast = true } : AppSettings.Load();
+        _settings = demo
+            ? new AppSettings { Broadcast = true, StereoStream = Environment.GetCommandLineArgs().Contains("--stereo") }
+            : AppSettings.Load();
         DawSlider.Value = _settings.DawVolume;
         MicSlider.Value = _settings.MicVolume;
         Lock48Check.IsChecked = demo || DriverConfig.Lock48k;
         BroadcastToggle.IsChecked = _settings.Broadcast;
+        StereoCheck.IsChecked = _settings.StereoStream;
 
         if (demo)
         {
@@ -82,6 +85,7 @@ public partial class MainWindow : Window
                 ScheduleDeviceRefresh();
             });
             _engine.Broadcast = _settings.Broadcast;
+            _engine.StereoStream = _settings.StereoStream;
             ApplyGains();
 
             _enumerator = new MMDeviceEnumerator();
@@ -237,6 +241,16 @@ public partial class MainWindow : Window
         SharedDawBus.SignalDriverReset();   // a running DAW re-opens AmpCast ASIO with the new interface
     }
 
+    private void StereoCheck_Changed(object sender, RoutedEventArgs e)
+    {
+        bool stereo = StereoCheck.IsChecked == true;
+        if (_engine is not null) _engine.StereoStream = stereo;
+        UpdateBroadcastVisuals();
+        if (_loading || _demo) return;
+        _settings.StereoStream = stereo;
+        _settings.Save();
+    }
+
     private void Lock48Check_Changed(object sender, RoutedEventArgs e)
     {
         if (_loading || _demo) return;
@@ -300,9 +314,24 @@ public partial class MainWindow : Window
         HeroBadge.Text = on ? "В ЭФИРЕ" : "НЕ В ЭФИРЕ";
         HeroBadgeDot.Fill = on ? Brushes.White : new SolidColorBrush(Color.FromRgb(0x80, 0x84, 0x8E));
         HeroTitle.Text = on ? "Вас слышат в Discord" : "Трансляция выключена";
+        bool stereo = StereoCheck.IsChecked == true;
         HeroSubtitle.Text = string.IsNullOrEmpty(output)
             ? "Выберите виртуальный кабель, чтобы начать"
-            : $"DAW + микрофон → {output} · стерео";
+            : stereo ? "DAW → демонстрация экрана Discord · стерео"
+                     : $"DAW + микрофон → {output} · моно";
+
+        // Stereo mode: the microphone goes to Discord directly, AmpCast carries the DAW only.
+        MicStrip.Opacity = stereo ? 0.4 : 1.0;
+        MicStrip.IsEnabled = !stereo;
+        MicCombo.IsEnabled = !stereo;
+        MicLabel.Text = stereo ? "Микрофон — идёт в Discord напрямую" : "Микрофон (голос)";
+        OutputLabel.Text = stereo ? "Выход (виртуальный кабель, его никто не слушает)" : "Выход в Discord (виртуальный кабель)";
+        Step2Text.Text = stereo
+            ? "Discord → Голос и видео → Устройство ввода: ваш микрофон (не кабель)."
+            : "Discord → Голос и видео → Устройство ввода: виртуальный кабель.";
+        Step3Text.Text = stereo
+            ? "Демонстрация экрана → Приложения → AmpCast, звук включён. Окно AmpCast не закрывайте."
+            : "Отключите в Discord шумоподавление и эхоподавление.";
 
         OutBadge.Background = on ? (Brush)FindResource("DangerBrush") : new SolidColorBrush(Color.FromRgb(0x38, 0x3A, 0x40));
         OutBadgeText.Text = on ? "● LIVE" : "ВЫКЛ";
@@ -541,7 +570,8 @@ public partial class MainWindow : Window
 
     private void HideToTray()
     {
-        if (_tray is null)
+        // Discord can only share a window that exists: in stereo mode keep it on the taskbar.
+        if (_tray is null || StereoCheck.IsChecked == true)
         {
             WindowState = WindowState.Minimized;
             return;

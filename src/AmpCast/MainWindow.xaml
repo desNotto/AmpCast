@@ -109,7 +109,7 @@
 
                 <!-- footer -->
                 <TextBlock DockPanel.Dock="Bottom" Margin="4,12,0,0" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                           Text="v1.0.1 · бесплатно · © desNotto" />
+                           Text="v1.0.2 · бесплатно · © desNotto" />
 
                 <!-- quick setup -->
                 <Border DockPanel.Dock="Bottom" CornerRadius="14" Background="{StaticResource BaseBrush}" Padding="14,12">
@@ -119,10 +119,10 @@
                             <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="1 " />В DAW выберите драйвер «AmpCast ASIO», 48 кГц, буфер 64–128.
                         </TextBlock>
                         <TextBlock Style="{StaticResource Muted}" FontSize="11.5" Margin="0,0,0,6">
-                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="2 " />Discord → Голос и видео → Устройство ввода: виртуальный кабель.
+                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="2 " /><Run x:Name="Step2Text" Text="Discord → Голос и видео → Устройство ввода: виртуальный кабель." />
                         </TextBlock>
                         <TextBlock Style="{StaticResource Muted}" FontSize="11.5">
-                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="3 " />Отключите в Discord шумоподавление и эхоподавление.
+                            <Run Foreground="{StaticResource PurpleBrush}" FontWeight="Bold" Text="3 " /><Run x:Name="Step3Text" Text="Отключите в Discord шумоподавление и эхоподавление." />
                         </TextBlock>
                     </StackPanel>
                 </Border>
@@ -226,15 +226,20 @@
                         <ComboBox x:Name="AsioCombo" Style="{StaticResource DarkComboBox}" Tag="ASIO-интерфейс не найден"
                                   SelectionChanged="AsioCombo_SelectionChanged" />
 
-                        <TextBlock Text="Микрофон (голос)" Style="{StaticResource Label}" Margin="2,14,0,6" />
+                        <TextBlock x:Name="MicLabel" Text="Микрофон (голос)" Style="{StaticResource Label}" Margin="2,14,0,6" />
                         <ComboBox x:Name="MicCombo" Style="{StaticResource DarkComboBox}" Tag="Без микрофона"
                                   SelectionChanged="DeviceCombo_SelectionChanged" />
 
-                        <TextBlock Text="Выход в Discord (виртуальный кабель)" Style="{StaticResource Label}" Margin="2,14,0,6" />
+                        <TextBlock x:Name="OutputLabel" Text="Выход в Discord (виртуальный кабель)" Style="{StaticResource Label}" Margin="2,14,0,6" />
                         <ComboBox x:Name="OutputCombo" Style="{StaticResource DarkComboBox}" Tag="Выберите виртуальный кабель"
                                   SelectionChanged="DeviceCombo_SelectionChanged" />
 
-                        <CheckBox x:Name="Lock48Check" Style="{StaticResource Switch}" Margin="2,16,0,0"
+                        <CheckBox x:Name="StereoCheck" Style="{StaticResource Switch}" Margin="2,16,0,0"
+                                  Content="Стерео через демонстрацию экрана"
+                                  ToolTip="Голосовой канал Discord всегда моно. В этом режиме DAW звучит в стерео через «Демонстрацию экрана» окна AmpCast, а голос идёт в Discord напрямую с микрофона."
+                                  Checked="StereoCheck_Changed" Unchecked="StereoCheck_Changed" />
+
+                        <CheckBox x:Name="Lock48Check" Style="{StaticResource Switch}" Margin="2,12,0,0"
                                   Content="Только 48 кГц (защита от хрипа и скрежета)"
                                   Checked="Lock48Check_Changed" Unchecked="Lock48Check_Changed" />
 
@@ -292,7 +297,7 @@
                             </Border>
 
                             <!-- MIC strip -->
-                            <Border Grid.Column="2" Style="{StaticResource Strip}">
+                            <Border x:Name="MicStrip" Grid.Column="2" Style="{StaticResource Strip}">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="Auto" />
