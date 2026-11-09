@@ -38,8 +38,8 @@ CloseApplications=yes
 RestartApplications=no
 
 [Languages]
-Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
-Name: "english"; MessagesFile: "compiler:Default.isl"
+Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"; InfoAfterFile: "after-install-ru.txt"
+Name: "english"; MessagesFile: "compiler:Default.isl"; InfoAfterFile: "after-install-en.txt"
 
 [CustomMessages]
 russian.TaskCable=Установить виртуальный аудиокабель «AmpCast Cable» (микрофон для Discord)

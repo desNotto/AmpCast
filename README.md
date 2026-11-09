@@ -10,6 +10,13 @@ Studio One, Reaper, Cubase…), слышит себя в наушниках **б
 
 ![UI](assets/ui-preview.png)
 
+## Скачать
+
+**[AmpCast-Setup-1.0.0.exe](https://github.com/desNotto/AmpCast/releases/latest)** — установщик
+(Windows 10/11, 64-бит; .NET ставить не нужно). Для Discord дополнительно нужен
+бесплатный виртуальный кабель [VB-CABLE](https://vb-audio.com/Cable/) — после установки
+AmpCast покажет пошаговую инструкцию.
+
 ---
 
 ## Архитектура
@@ -64,7 +71,7 @@ tools/make-icon.ps1          векторный логотип → AmpCast.ico +
 ## Сборка
 
 Нужно: **Build Tools for Visual Studio 2022** (компонент «Разработка классических
-приложений на C++»), **.NET SDK 10**, **Inno Setup 6**.
+приложений на C++»), **.NET SDK 10**, **Inno Setup 6** (`winget install JRSoftware.InnoSetup`).
 
 ```powershell
 .\build.ps1
@@ -99,9 +106,9 @@ tools/make-icon.ps1          векторный логотип → AmpCast.ico +
 
 ## Ограничения и что осталось сделать
 
-- **C++-драйвер ещё не собран и не проверен в DAW** на этой машине: здесь нет
-  компилятора C++. Перед релизом обязательно прогнать в FL Studio / Reaper / Ableton
-  с вашими Audient и HOTONE.
+- **Версия 1.0 — тестовая.** Драйвер проверен тестовым ASIO-хостом
+  (`tools/asio-smoke`) на Audient USB Audio (x64 и x86, 48 кГц); проверка в
+  FL Studio / Reaper / Ableton / Studio One ещё идёт — сообщайте о проблемах в Issues.
 - **Виртуальный кабель**: драйвер режима ядра требует подписи Microsoft. Варианты —
   в [driver/README.md](driver/README.md). Без него AmpCast работает с уже
   установленным VB-CABLE или любым другим виртуальным устройством.

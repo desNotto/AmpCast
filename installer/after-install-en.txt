@@ -1,0 +1,21 @@
+﻿AmpCast is installed. Four more steps:
+
+1. VIRTUAL CABLE (once)
+   Discord hears AmpCast through a virtual audio device.
+   If you don't have one yet, install the free VB-CABLE:
+   https://vb-audio.com/Cable/  (run VBCABLE_Setup_x64.exe as administrator,
+   then restart the PC).
+
+2. AMPCAST
+   Pick your audio interface, your microphone and the "CABLE Input" output.
+
+3. DAW (FL Studio, Ableton, Studio One, Reaper, Cubase...)
+   Audio driver: "AmpCast ASIO", 48 kHz, buffer 64-128.
+   If the DAW was open during setup, restart it.
+
+4. DISCORD > Settings > Voice & Video
+   Input device: "CABLE Output (VB-Audio Virtual Cable)".
+   Turn off noise suppression, echo cancellation and automatic gain control.
+   Then press "Broadcast to Discord" in AmpCast.
+
+You can close the AmpCast window; it keeps running in the tray.
