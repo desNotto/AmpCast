@@ -24,7 +24,12 @@ internal sealed unsafe class SharedDawBus : IFrameSource, IDisposable
     // Header offsets
     private const int OffMagic = 0, OffVersion = 4, OffChannels = 8, OffCapacity = 12, OffSampleRate = 16,
                       OffBufferSize = 24, OffOwnerPid = 28, OffWritePos = 32, OffHeartbeat = 40,
-                      OffStreaming = 48, OffHostName = 56;
+                      OffStreaming = 48, OffHostName = 56,
+                      OffShareMode = 184, OffShareGain = 188, OffShareSerial = 192, OffShareState = 196,
+                      OffShareBufferedMs = 200;
+
+    /// <summary>Values of the driver's stereo screen-share output state (negative = HRESULT).</summary>
+    public const int ShareOff = 0, ShareRunning = 1, ShareNoDevice = 2, ShareWaiting = 3;
 
     private readonly MemoryMappedFile _file;
     private readonly MemoryMappedViewAccessor _view;
@@ -76,6 +81,22 @@ internal sealed unsafe class SharedDawBus : IFrameSource, IDisposable
                 .CopyTo(destination.AsSpan(destinationOffset + first * BusChannels));
     }
 
+    /// <summary>
+    /// Controls the stereo output the driver plays from inside the DAW process
+    /// (heard by Discord when the DAW window is shared). Any thread.
+    /// </summary>
+    public void SetShare(bool enabled, float gain)
+    {
+        Volatile.Write(ref Unsafe.AsRef<float>(_base + OffShareGain), gain);
+        Volatile.Write(ref I32(OffShareMode), enabled ? 1 : 0);
+    }
+
+    /// <summary>Tells the driver to re-open its stereo output device (read from the registry).</summary>
+    public void BumpShareSerial() => Interlocked.Increment(ref I32(OffShareSerial));
+
+    public int ShareState => Volatile.Read(ref I32(OffShareState));
+    public float ShareBufferedMs => Volatile.Read(ref Unsafe.AsRef<float>(_base + OffShareBufferedMs));
+
     /// <summary>Asks a running DAW to re-open AmpCast ASIO (applies a new interface / 48 kHz lock).</summary>
     public static void SignalDriverReset()
     {
@@ -91,6 +112,7 @@ internal sealed unsafe class SharedDawBus : IFrameSource, IDisposable
     }
 
     private ref uint U32(int offset) => ref Unsafe.AsRef<uint>(_base + offset);
+    private ref int I32(int offset) => ref Unsafe.AsRef<int>(_base + offset);
     private ref long I64(int offset) => ref Unsafe.AsRef<long>(_base + offset);
 
     public void Dispose()

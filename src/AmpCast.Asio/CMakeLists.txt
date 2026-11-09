@@ -12,6 +12,8 @@ add_library(AmpCastAsio SHARED
     src/asio_abi.h
     src/SharedBus.h
     src/SharedBus.cpp
+    src/ShareRenderer.h
+    src/ShareRenderer.cpp
     src/AmpCastAsio.h
     src/AmpCastAsio.cpp
     src/dllmain.cpp
@@ -19,7 +21,7 @@ add_library(AmpCastAsio SHARED
 
 target_compile_definitions(AmpCastAsio PRIVATE UNICODE _UNICODE WIN32_LEAN_AND_MEAN NOMINMAX _CRT_SECURE_NO_WARNINGS)
 target_compile_options(AmpCastAsio PRIVATE /W4 /permissive- /utf-8 /O2)
-target_link_libraries(AmpCastAsio PRIVATE ole32 advapi32 uuid user32)
+target_link_libraries(AmpCastAsio PRIVATE ole32 advapi32 uuid user32 avrt)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     set_target_properties(AmpCastAsio PROPERTIES OUTPUT_NAME AmpCastAsio64)

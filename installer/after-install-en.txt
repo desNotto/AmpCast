@@ -21,7 +21,7 @@
 STEREO. Discord voice channels are always mono. For stereo DAW sound:
    turn on "Stereo via screen share" in AmpCast,
    set the Discord input device to your microphone (not the cable),
-   Share Screen > Applications > AmpCast, with sound on.
-   Keep the AmpCast window open (minimizing is fine).
+   Share Screen > your DAW window, with sound on.
+   Students see the DAW and hear it in stereo; your voice goes as usual.
 
 In normal mode you can close the AmpCast window; it keeps running in the tray.

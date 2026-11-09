@@ -32,11 +32,23 @@ struct BusHeader {
     volatile LONG   streaming;       //  48  1 between start() and stop()
     uint32_t        reserved0;       //  52
     wchar_t         hostName[64];    //  56  DAW executable name
-    uint8_t         reserved1[72];   // 184
+    // Stereo screen-share output (driver plays the DAW mix as ordinary Windows
+    // audio from inside the DAW process, so Discord's "share window" hears it).
+    volatile LONG   shareMode;       // 184  app -> driver: 1 = on
+    volatile float  shareGain;       // 188  app -> driver: linear gain (0 = muted)
+    volatile LONG   shareSerial;     // 192  app -> driver: bumped when the device changes
+    volatile LONG   shareState;      // 196  driver -> app: ShareState / negative HRESULT
+    volatile float  shareBufferedMs; // 200  driver -> app: diagnostics
+    uint8_t         reserved1[52];   // 204
 };
 static_assert(sizeof(BusHeader) == kBusHeaderSize, "BusHeader must be 256 bytes");
 static_assert(offsetof(BusHeader, writePos) == 32, "layout mismatch");
 static_assert(offsetof(BusHeader, hostName) == 56, "layout mismatch");
+static_assert(offsetof(BusHeader, shareMode) == 184, "layout mismatch");
+static_assert(offsetof(BusHeader, shareBufferedMs) == 200, "layout mismatch");
+
+// BusHeader::shareState values (negative = HRESULT of the failure).
+enum ShareState : LONG { kShareOff = 0, kShareRunning = 1, kShareNoDevice = 2, kShareWaiting = 3 };
 
 class SharedBus {
 public:
@@ -58,6 +70,9 @@ public:
 
     // Real-time safe: two memcpy + one interlocked store. No allocations, no locks.
     void Write(const float* interleavedStereo, uint32_t frames);
+
+    BusHeader*   Header() const { return m_header; }
+    const float* Data() const { return m_data; }
 
 private:
     HANDLE     m_mapping = nullptr;

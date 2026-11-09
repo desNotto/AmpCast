@@ -23,7 +23,7 @@
     <Authors>desNotto</Authors>
     <Copyright>© desNotto. Free software.</Copyright>
     <Description>AmpCast — guitar from your DAW to Discord, zero-latency monitoring.</Description>
-    <Version>1.0.2</Version>
+    <Version>1.0.3</Version>
 
     <!-- Audio-friendly runtime settings: workstation + concurrent GC,
          the audio callbacks themselves are allocation-free. -->

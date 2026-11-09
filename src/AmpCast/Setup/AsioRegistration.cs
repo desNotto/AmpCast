@@ -132,6 +132,13 @@ public static class DriverConfig
         set => WriteValue("AsioDevice", value ?? string.Empty, RegistryValueKind.String);
     }
 
+    /// <summary>Endpoint ID the driver plays the stereo screen-share output to.</summary>
+    public static string? ShareDevice
+    {
+        get => Read<string>("ShareDevice");
+        set => WriteValue("ShareDevice", value ?? string.Empty, RegistryValueKind.String);
+    }
+
     public static bool Lock48k
     {
         get => Read<object>("Lock48k") is not int v || v != 0;   // default: on

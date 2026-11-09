@@ -94,6 +94,7 @@ AmpCastAsio::AmpCastAsio()
 AmpCastAsio::~AmpCastAsio()
 {
     StopWatch();
+    m_share.Stop();
     if (m_hw) {
         if (m_buffersCreated) {
             m_hw->stop();
@@ -308,8 +309,10 @@ ASIOError AmpCastAsio::start()
     if (!m_hw || !m_buffersCreated)
         return ASE_InvalidMode;
     const ASIOError e = m_hw->start();
-    if (e == ASE_OK && m_busOwner)
+    if (e == ASE_OK && m_busOwner) {
         m_bus.SetStreaming(true);
+        m_share.Start(&m_bus);      // idles until stereo mode is switched on in AmpCast
+    }
     return e;
 }
 
@@ -318,6 +321,7 @@ ASIOError AmpCastAsio::stop()
     if (!m_hw)
         return ASE_NotPresent;
     const ASIOError e = m_hw->stop();
+    m_share.Stop();
     if (m_busOwner)
         m_bus.SetStreaming(false);
     return e;
@@ -523,6 +527,7 @@ ASIOError AmpCastAsio::disposeBuffers()
     if (!m_hw || !m_buffersCreated)
         return ASE_InvalidMode;
     const ASIOError e = m_hw->disposeBuffers();
+    m_share.Stop();
     if (m_busOwner) {
         m_bus.Release();
         m_busOwner = false;

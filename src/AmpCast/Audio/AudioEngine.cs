@@ -74,16 +74,27 @@ public sealed class AudioEngine : IDisposable
     public event Action<string>? DeviceFailed;
 
     public float MicGain { get => _micGainTarget; set => _micGainTarget = Math.Max(0f, value); }
-    public float DawGain { get => _dawGainTarget; set => _dawGainTarget = Math.Max(0f, value); }
-    public bool Broadcast { get => _broadcast; set => _broadcast = value; }
+    public float DawGain { get => _dawGainTarget; set { _dawGainTarget = Math.Max(0f, value); PushShare(); } }
+    public bool Broadcast { get => _broadcast; set { _broadcast = value; PushShare(); } }
 
     /// <summary>
-    /// Stereo mode for Discord screen sharing: Discord's voice channel downmixes any
-    /// microphone to mono, but a shared application's audio stays stereo. In this mode
-    /// the output carries the DAW only; the voice goes to Discord directly from the
-    /// real microphone, so it is not heard twice.
+    /// Stereo mode for Discord screen sharing. Discord's voice channel downmixes any
+    /// microphone to mono, but the audio of a shared window stays stereo. In this mode
+    /// the AmpCast ASIO driver itself plays the DAW mix as ordinary Windows audio from
+    /// inside the DAW process (to the selected output, which nobody listens to), so
+    /// sharing the DAW window in Discord carries it in stereo. AmpCast's own output is
+    /// silent and the voice goes to Discord directly from the real microphone.
     /// </summary>
-    public bool StereoStream { get => _stereoStream; set => _stereoStream = value; }
+    public bool StereoStream { get => _stereoStream; set { _stereoStream = value; PushShare(); } }
+
+    /// <summary>State of the driver's stereo output (SharedDawBus.Share* constants).</summary>
+    public int ShareState => _bus.ShareState;
+    public double ShareBufferedMs => _bus.ShareBufferedMs;
+
+    /// <summary>Makes the driver re-open its stereo output device (after DriverConfig.ShareDevice changed).</summary>
+    public void ReopenShareDevice() => _bus.BumpShareSerial();
+
+    private void PushShare() => _bus.SetShare(_stereoStream, _broadcast ? _dawGainTarget : 0f);
 
     public bool DawConnected => _bus.IsAlive;
     public string DawHostName => _bus.HostName;
@@ -304,6 +315,7 @@ public sealed class AudioEngine : IDisposable
         float peakDawL = 0, peakDawR = 0, peakMic = 0, peakOutL = 0, peakOutR = 0;
         bool clipped = false;
         int channels = _outChannels;
+        bool stereoStream = _stereoStream;
         float[] daw = _dawBlock, mic = _micBlock;
 
         for (int i = 0, o = 0; i < frames; i++, o += channels)
@@ -328,7 +340,12 @@ public sealed class AudioEngine : IDisposable
             peakOutL = MathF.Max(peakOutL, MathF.Abs(l));
             peakOutR = MathF.Max(peakOutR, MathF.Abs(r));
 
-            if (channels == 1)
+            if (stereoStream)
+            {
+                // The driver plays the DAW from inside the DAW process; meters still show it.
+                for (int c = 0; c < channels; c++) output[o + c] = 0f;
+            }
+            else if (channels == 1)
             {
                 output[o] = 0.5f * (l + r);
             }
@@ -439,6 +456,7 @@ public sealed class AudioEngine : IDisposable
     public void Dispose()
     {
         Stop();
+        _bus.SetShare(false, 0f);   // AmpCast closed: the DAW stops playing to the cable
         _bus.Dispose();
     }
 }

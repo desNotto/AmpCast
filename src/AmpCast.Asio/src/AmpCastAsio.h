@@ -11,6 +11,7 @@
 
 #include "asio_abi.h"
 #include "SharedBus.h"
+#include "ShareRenderer.h"
 
 #include <atomic>
 #include <vector>
@@ -107,8 +108,9 @@ private:
     TapSource                  m_taps[8] = {};
     int                        m_tapCount = 0;
 
-    ampcast::SharedBus m_bus;
-    bool               m_busOwner = false;
+    ampcast::SharedBus     m_bus;
+    bool                   m_busOwner = false;
+    ampcast::ShareRenderer m_share;     // stereo output for Discord window sharing
 
     HANDLE m_resetEvent  = nullptr;
     HANDLE m_stopEvent   = nullptr;

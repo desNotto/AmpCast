@@ -76,7 +76,7 @@
                         <Grid.ColumnDefinitions><ColumnDefinition Width="18" /><ColumnDefinition Width="*" /></Grid.ColumnDefinitions>
                         <Ellipse x:Name="CableDot" Style="{StaticResource StatusDot}" Margin="0,6,0,0" VerticalAlignment="Top" />
                         <StackPanel Grid.Column="1">
-                            <TextBlock Text="Discord-кабель" FontSize="13" FontWeight="SemiBold" />
+                            <TextBlock x:Name="CableTitle" Text="Discord-кабель" FontSize="13" FontWeight="SemiBold" />
                             <TextBlock x:Name="CableStatusText" Text="—" FontSize="11.5" Foreground="{StaticResource TextMutedBrush}" TextTrimming="CharacterEllipsis" />
                         </StackPanel>
                     </Grid>
@@ -109,7 +109,7 @@
 
                 <!-- footer -->
                 <TextBlock DockPanel.Dock="Bottom" Margin="4,12,0,0" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                           Text="v1.0.2 · бесплатно · © desNotto" />
+                           Text="v1.0.3 · бесплатно · © desNotto" />
 
                 <!-- quick setup -->
                 <Border DockPanel.Dock="Bottom" CornerRadius="14" Background="{StaticResource BaseBrush}" Padding="14,12">
@@ -236,7 +236,7 @@
 
                         <CheckBox x:Name="StereoCheck" Style="{StaticResource Switch}" Margin="2,16,0,0"
                                   Content="Стерео через демонстрацию экрана"
-                                  ToolTip="Голосовой канал Discord всегда моно. В этом режиме DAW звучит в стерео через «Демонстрацию экрана» окна AmpCast, а голос идёт в Discord напрямую с микрофона."
+                                  ToolTip="Голосовой канал Discord всегда моно. В этом режиме DAW звучит в стерео, когда вы демонстрируете в Discord окно DAW со звуком. Голос идёт в Discord напрямую с микрофона."
                                   Checked="StereoCheck_Changed" Unchecked="StereoCheck_Changed" />
 
                         <CheckBox x:Name="Lock48Check" Style="{StaticResource Switch}" Margin="2,12,0,0"

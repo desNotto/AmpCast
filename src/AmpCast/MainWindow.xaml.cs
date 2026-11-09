@@ -29,7 +29,8 @@ public partial class MainWindow : Window
     private sealed record Snapshot(
         bool DawConnected, string DawHost, double DawRate, int DawBuffer,
         string MicName, int MicRate, string OutName, int OutRate,
-        bool Running, double BufferedMs, double DriftPpm, int Dropouts, string? Error);
+        bool Running, double BufferedMs, double DriftPpm, int Dropouts, string? Error,
+        bool Stereo, int ShareState, double ShareMs);
 
     private const int WaveBarCount = 22;
 
@@ -52,6 +53,7 @@ public partial class MainWindow : Window
     private bool _exiting;
     private string? _activeMicId, _activeOutId;
     private string? _deviceError;
+    private DateTime? _shareOffSince;
     private string _warningsKey = string.Empty;
 
     private Forms.NotifyIcon? _tray;
@@ -211,10 +213,20 @@ public partial class MainWindow : Window
 
         _deviceError = null;
         _engine.Start(micId, outId);
+        SyncShareDevice(outId);
         _activeMicId = micId;
         _activeOutId = outId;
         UpdateBroadcastVisuals();
         RefreshStatus();
+    }
+
+    /// <summary>The driver plays the stereo screen-share output to the same device AmpCast uses.</summary>
+    private void SyncShareDevice(string? outId)
+    {
+        if (_engine is null || string.IsNullOrEmpty(outId)) return;
+        if (DriverConfig.ShareDevice == outId) return;
+        DriverConfig.ShareDevice = outId;
+        _engine.ReopenShareDevice();
     }
 
     private void ScheduleDeviceRefresh()
@@ -245,6 +257,7 @@ public partial class MainWindow : Window
     {
         bool stereo = StereoCheck.IsChecked == true;
         if (_engine is not null) _engine.StereoStream = stereo;
+        SyncShareDevice(_activeOutId);
         UpdateBroadcastVisuals();
         if (_loading || _demo) return;
         _settings.StereoStream = stereo;
@@ -317,7 +330,7 @@ public partial class MainWindow : Window
         bool stereo = StereoCheck.IsChecked == true;
         HeroSubtitle.Text = string.IsNullOrEmpty(output)
             ? "Выберите виртуальный кабель, чтобы начать"
-            : stereo ? "DAW → демонстрация экрана Discord · стерео"
+            : stereo ? "DAW → демонстрация окна DAW в Discord · стерео"
                      : $"DAW + микрофон → {output} · моно";
 
         // Stereo mode: the microphone goes to Discord directly, AmpCast carries the DAW only.
@@ -325,12 +338,12 @@ public partial class MainWindow : Window
         MicStrip.IsEnabled = !stereo;
         MicCombo.IsEnabled = !stereo;
         MicLabel.Text = stereo ? "Микрофон — идёт в Discord напрямую" : "Микрофон (голос)";
-        OutputLabel.Text = stereo ? "Выход (виртуальный кабель, его никто не слушает)" : "Выход в Discord (виртуальный кабель)";
+        OutputLabel.Text = stereo ? "Выход для DAW (виртуальный кабель)" : "Выход в Discord (виртуальный кабель)";
         Step2Text.Text = stereo
             ? "Discord → Голос и видео → Устройство ввода: ваш микрофон (не кабель)."
             : "Discord → Голос и видео → Устройство ввода: виртуальный кабель.";
         Step3Text.Text = stereo
-            ? "Демонстрация экрана → Приложения → AmpCast, звук включён. Окно AmpCast не закрывайте."
+            ? "Демонстрация экрана → окно вашей DAW, звук включён."
             : "Отключите в Discord шумоподавление и эхоподавление.";
 
         OutBadge.Background = on ? (Brush)FindResource("DangerBrush") : new SolidColorBrush(Color.FromRgb(0x38, 0x3A, 0x40));
@@ -349,11 +362,13 @@ public partial class MainWindow : Window
     {
         if (_demo)
             return new Snapshot(true, "FL64.exe", 48000, 128, "Микрофон (Rode NT-USB)", 48000,
-                                "CABLE Input (VB-Audio Virtual Cable)", 48000, true, 31, 12, 0, null);
+                                "CABLE Input (VB-Audio Virtual Cable)", 48000, true, 31, 12, 0, null,
+                                StereoCheck.IsChecked == true, SharedDawBus.ShareRunning, 31);
         var e = _engine!;
         return new Snapshot(e.DawConnected, e.DawConnected ? e.DawHostName : string.Empty, e.DawSampleRate, e.DawBufferSize,
                             e.MicName, e.MicSampleRate, e.OutputName, e.OutputSampleRate, e.IsRunning,
-                            e.DawBufferedMs, e.DawDriftPpm, e.Dropouts, _deviceError ?? e.LastError);
+                            e.DawBufferedMs, e.DawDriftPpm, e.Dropouts, _deviceError ?? e.LastError,
+                            e.StereoStream, e.ShareState, e.ShareBufferedMs);
     }
 
     private void RefreshStatus()
@@ -381,8 +396,34 @@ public partial class MainWindow : Window
         // Mic / cable
         MicDot.Fill = s.MicRate > 0 ? green : grey;
         MicStatusText.Text = s.MicRate > 0 ? ShortName(s.MicName) : "выключен";
-        CableDot.Fill = s.Running ? green : red;
-        CableStatusText.Text = s.Running ? ShortName(s.OutName) : "не выбран";
+        // Stereo mode: the driver inside the DAW plays the mix; report its state.
+        if (s.Stereo && s.DawConnected && s.ShareState == SharedDawBus.ShareOff)
+            _shareOffSince ??= DateTime.UtcNow;
+        else
+            _shareOffSince = null;
+        bool oldDriver = _shareOffSince is { } since && DateTime.UtcNow - since > TimeSpan.FromSeconds(3);
+        CableTitle.Text = s.Stereo ? "Стерео из DAW" : "Discord-кабель";
+        if (!s.Stereo)
+        {
+            CableDot.Fill = s.Running ? green : red;
+            CableStatusText.Text = s.Running ? ShortName(s.OutName) : "не выбран";
+        }
+        else if (!s.DawConnected)
+        {
+            CableDot.Fill = grey;
+            CableStatusText.Text = "ждёт DAW";
+        }
+        else
+        {
+            (CableDot.Fill, CableStatusText.Text) = s.ShareState switch
+            {
+                SharedDawBus.ShareRunning => (green, "играет — покажите окно DAW"),
+                SharedDawBus.ShareWaiting => (yellow, "ждёт звук DAW"),
+                SharedDawBus.ShareNoDevice => (red, "выберите выход"),
+                SharedDawBus.ShareOff => oldDriver ? (red, "перезапустите DAW") : (yellow, "запуск…"),
+                _ => (red, $"ошибка 0x{s.ShareState:X8}"),
+            };
+        }
 
         // Sample rates
         var rates = new List<string>();
@@ -398,7 +439,14 @@ public partial class MainWindow : Window
         if (s.Error is not null) warnings.Add((red, s.Error));
         if (!driverRegistered) warnings.Add((red, "AmpCast ASIO не зарегистрирован. Переустановите AmpCast (нужны права администратора)."));
         if (!_demo && AsioCombo.Items.Count == 0) warnings.Add((yellow, "Не найден ни один ASIO-драйвер звуковой карты. Установите драйвер вашего аудиоинтерфейса."));
-        if (s.Running && !LooksVirtual(s.OutName)) warnings.Add((yellow, $"«{ShortName(s.OutName)}» — не виртуальный кабель: Discord его не услышит. Установите AmpCast Cable или VB-CABLE."));
+        if (s.Running && !LooksVirtual(s.OutName))
+            warnings.Add((yellow, s.Stereo
+                ? $"«{ShortName(s.OutName)}» — не виртуальный кабель: DAW будет звучать на нём второй раз. Выберите VB-CABLE или AmpCast Cable."
+                : $"«{ShortName(s.OutName)}» — не виртуальный кабель: Discord его не услышит. Установите AmpCast Cable или VB-CABLE."));
+        if (oldDriver)
+            warnings.Add((red, "DAW использует старую версию драйвера AmpCast ASIO. Закройте и снова откройте DAW."));
+        if (s.Stereo && s.ShareState < 0)
+            warnings.Add((red, $"Стерео-выход DAW не открылся (0x{s.ShareState:X8}). Выберите другой выход или перезапустите DAW."));
         if (s.MicRate > 0 && LooksVirtual(s.MicName)) warnings.Add((yellow, "Микрофоном выбран виртуальный кабель — возможна петля и эхо."));
         if (s.OutRate > 0 && s.OutRate != AudioEngine.RequiredSampleRate) warnings.Add((yellow, $"Кабель работает на {s.OutRate / 1000.0:0.#} кГц. AmpCast пересчитывает звук, но лучше выставить 48 кГц в «Звук Windows»."));
         if (s.MicRate > 0 && s.MicRate != AudioEngine.RequiredSampleRate) warnings.Add((yellow, $"Микрофон работает на {s.MicRate / 1000.0:0.#} кГц — включён ресэмплинг. Рекомендуется 48 кГц."));
@@ -408,7 +456,9 @@ public partial class MainWindow : Window
 
         // Footer
         FooterText.Text = s.DawConnected
-            ? $"AmpCast ASIO → {asioName} · {s.DawBuffer} smp @ {s.DawRate:0} Гц · буфер Discord ≈ {s.BufferedMs:0} мс · дрейф {s.DriftPpm:+0;-0;0} ppm · сбоев: {s.Dropouts}"
+            ? s.Stereo
+                ? $"AmpCast ASIO → {asioName} · {s.DawBuffer} smp @ {s.DawRate:0} Гц · стерео-выход из DAW ≈ {s.ShareMs:0} мс"
+                : $"AmpCast ASIO → {asioName} · {s.DawBuffer} smp @ {s.DawRate:0} Гц · буфер Discord ≈ {s.BufferedMs:0} мс · дрейф {s.DriftPpm:+0;-0;0} ppm · сбоев: {s.Dropouts}"
             : $"AmpCast ASIO → {asioName} · ожидание DAW";
     }
 
@@ -570,8 +620,7 @@ public partial class MainWindow : Window
 
     private void HideToTray()
     {
-        // Discord can only share a window that exists: in stereo mode keep it on the taskbar.
-        if (_tray is null || StereoCheck.IsChecked == true)
+        if (_tray is null)
         {
             WindowState = WindowState.Minimized;
             return;
