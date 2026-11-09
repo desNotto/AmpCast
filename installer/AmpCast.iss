@@ -2,7 +2,7 @@
 ; Build: run ..\build.ps1, or ISCC.exe AmpCast.iss after "dotnet publish" + the native driver build.
 
 #define AppName      "AmpCast"
-#define AppVersion   "1.0.0"
+#define AppVersion   "1.0.1"
 #define AppPublisher "desNotto"
 #define AppExe       "AmpCast.exe"
 #define PublishDir   "..\build\publish"

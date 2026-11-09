@@ -109,7 +109,7 @@
 
                 <!-- footer -->
                 <TextBlock DockPanel.Dock="Bottom" Margin="4,12,0,0" FontSize="11" Foreground="{StaticResource TextMutedBrush}"
-                           Text="v1.0 · бесплатно · © desNotto" />
+                           Text="v1.0.1 · бесплатно · © desNotto" />
 
                 <!-- quick setup -->
                 <Border DockPanel.Dock="Bottom" CornerRadius="14" Background="{StaticResource BaseBrush}" Padding="14,12">

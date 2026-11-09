@@ -190,6 +190,7 @@ public sealed class AudioEngine : IDisposable
         _micRing = new FloatRing(MicSampleRate, 1);                 // 1 s of mono audio
         _captureScratch = new float[MicSampleRate / 2];              // 0.5 s per callback max
         _micReader.Configure(_micRing, MicSampleRate, OutputSampleRate, MicTargetMs);
+        _micReader.SourceBlockFrames = MicSampleRate * 20 / 1000;  // capture period
 
         _capture.DataAvailable += OnMicData;
         _capture.RecordingStopped += OnRecordingStopped;
@@ -277,6 +278,7 @@ public sealed class AudioEngine : IDisposable
         {
             if (dawRate > 8000 && Math.Abs(dawRate - _dawReader.SourceRate) > 0.5)
                 _dawReader.SetSourceRate(dawRate);
+            _dawReader.SourceBlockFrames = _bus.BufferSize;
             _dawReader.Read(_dawBlock, frames);
         }
         else

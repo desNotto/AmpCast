@@ -12,7 +12,7 @@ Studio One, Reaper, Cubase…), слышит себя в наушниках **б
 
 ## Скачать
 
-**[AmpCast-Setup-1.0.0.exe](https://github.com/desNotto/AmpCast/releases/latest)** — установщик
+**[AmpCast-Setup-1.0.1.exe](https://github.com/desNotto/AmpCast/releases/latest)** — установщик
 (Windows 10/11, 64-бит; .NET ставить не нужно). Для Discord дополнительно нужен
 бесплатный виртуальный кабель [VB-CABLE](https://vb-audio.com/Cable/) — после установки
 AmpCast покажет пошаговую инструкцию.
@@ -77,7 +77,7 @@ tools/make-icon.ps1          векторный логотип → AmpCast.ico +
 .\build.ps1
 ```
 
-Результат: `build\publish\` (программа) и `build\installer\AmpCast-Setup-1.0.0.exe`.
+Результат: `build\publish\` (программа) и `build\installer\AmpCast-Setup-1.0.1.exe`.
 
 Только C#-часть (без драйвера): `dotnet build src\AmpCast\AmpCast.csproj`.
 Превью интерфейса без звука: `AmpCast.exe --render-preview preview.png`.
